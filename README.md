@@ -8,6 +8,36 @@ Hey there! 👋 This document explains the folder structure of the project. It's
 
 Here’s a breakdown of the main folders and what they do:
 
+```text
+src/
+│
+├── domain/               # Domain Layer (Entities)
+│   ├── entities/         # Business objects (e.g., User, File, Folder)
+│   └── repositories/     # Interfaces for data access (e.g., UserRepository, FileRepository)
+│
+├── application/          # Application Layer (Use Cases)
+│   ├── use-cases/        # Business logic (e.g., RegisterUser, CreateFolder, UploadFile)
+│   └── services/         # Shared services (e.g., AuthService, StorageService)
+│
+├── interfaces/           # Interface Adapters Layer
+│   ├── controllers/      # Express.js controllers
+│   ├── presenters/       # Data formatting for responses
+│   ├── gateways/         # Adapters for external services (e.g., Supabase)
+│   └── middleware/       # Custom middleware (e.g., auth, file upload)
+│
+├── infrastructure/       # Frameworks & Drivers Layer
+│   ├── database/         # Database configurations and implementations
+│   ├── web/              # Express.js setup (e.g., app.js, routes)
+│   ├── third-party/      # External API integrations (e.g., Supabase SDK)
+│   └── utils/            # Utility functions (e.g., JWT validation, file handling)
+│
+├── config/               # Configuration files (e.g., environment variables)
+│
+└── tests/                # Test files
+    ├── unit/             # Unit tests
+    └── integration/      # Integration tests
+```
+
 ### **`src/`**
 
 This is where all the source code lives. It’s divided into layers to keep things organized and maintainable.
