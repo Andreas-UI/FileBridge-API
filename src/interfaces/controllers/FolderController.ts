@@ -2,27 +2,15 @@ import { Request, Response } from 'express';
 import { CreateFolder } from '../../application/use-cases/CreateFolder';
 import { FindAllFolder } from '../../application/use-cases/FindAllFolder';
 import { FindByIdFolder } from '../../application/use-cases/FindByIdFolder';
+import { Controller } from './Controller';
 
-export class FolderController {
+export class FolderController extends Controller {
   constructor(
     private createFolder: CreateFolder,
     private findAllFolder: FindAllFolder,
     private findByIdFolder: FindByIdFolder,
-  ) {}
-
-  private async handleRequest(
-    req: Request,
-    res: Response,
-    action: () => Promise<any>,
-  ): Promise<void> {
-    try {
-      const result = await action();
-      res.status(200).json(result);
-    } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : 'An unknown error occurred';
-      res.status(500).json({ message });
-    }
+  ) {
+    super();
   }
 
   async create(req: Request, res: Response): Promise<void> {
