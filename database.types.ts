@@ -12,32 +12,48 @@ export type Database = {
       File: {
         Row: {
           created_at: string
+          folder: number | null
           id: number
-          mime_type: string
+          mime_type: string | null
           name: string
-          size_kb: number
+          size_kb: number | null
+          url: string
+          user: string | null
         }
         Insert: {
           created_at?: string
+          folder?: number | null
           id?: number
-          mime_type: string
+          mime_type?: string | null
           name: string
-          size_kb: number
+          size_kb?: number | null
+          url: string
+          user?: string | null
         }
         Update: {
           created_at?: string
+          folder?: number | null
           id?: number
-          mime_type?: string
+          mime_type?: string | null
           name?: string
-          size_kb?: number
+          size_kb?: number | null
+          url?: string
+          user?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "File_folder_fkey"
+            columns: ["folder"]
+            isOneToOne: false
+            referencedRelation: "Folder"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       Folder: {
         Row: {
           created_at: string
           description: string | null
-          files: number | null
           id: number
           subject: string
           user: string | null
@@ -45,7 +61,6 @@ export type Database = {
         Insert: {
           created_at?: string
           description?: string | null
-          files?: number | null
           id?: number
           subject: string
           user?: string | null
@@ -53,20 +68,11 @@ export type Database = {
         Update: {
           created_at?: string
           description?: string | null
-          files?: number | null
           id?: number
           subject?: string
           user?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "Folder_files_fkey"
-            columns: ["files"]
-            isOneToOne: false
-            referencedRelation: "File"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {

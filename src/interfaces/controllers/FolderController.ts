@@ -13,17 +13,17 @@ export class FolderController extends Controller {
     super();
   }
 
-  async create(req: Request, res: Response): Promise<void> {
+  async create(req: Request, res: Response) {
     await this.handleRequest(req, res, () =>
       this.createFolder.execute(req.body),
     );
   }
 
-  async findAll(req: Request, res: Response): Promise<void> {
+  async findAll(req: Request, res: Response) {
     await this.handleRequest(req, res, () => this.findAllFolder.execute());
   }
 
-  async findById(req: Request, res: Response): Promise<void> {
+  async findById(req: Request, res: Response) {
     await this.handleRequest(req, res, () =>
       this.findByIdFolder.execute(Number(req.query.id)),
     );

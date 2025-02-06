@@ -10,6 +10,7 @@ import { requestLogger } from './src/interfaces/middleware/requestLogger';
 import { responseLogger } from './src/interfaces/middleware/responseLogger';
 import { authRoutes } from './src/infrastructure/web/authRoutes';
 import { authGuard } from './src/interfaces/middleware/authGuard';
+import multer from 'multer';
 
 function getLocalIp() {
   const os = require('os');
@@ -27,11 +28,16 @@ function getLocalIp() {
 const app = express();
 
 app.use(cors());
+
+app.use(multer().any());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 app.use(requestLogger);
 app.use(responseLogger);
 app.use('/auth', authRoutes);
-app.use('/api', authGuard, router);
+// app.use('/api', authGuard, router);
+app.use('/api', router);
 app.use(errorHandler);
 
 const PORT = 3000;
