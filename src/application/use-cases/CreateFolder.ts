@@ -1,4 +1,4 @@
-import { Folder, FolderInput } from "../../domain/entities/Folder";
+import { FolderInput } from "../../domain/entities/Folder";
 import { FolderRepository } from "../../domain/interfaces/FolderRepository";
 
 export class CreateFolder {

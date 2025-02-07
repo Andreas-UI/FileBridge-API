@@ -4,7 +4,7 @@ import { supabase } from '../../infrastructure/third-party/supabase';
 import { StorageService } from '../interfaces/StorageService';
 
 export class SupabaseStorageService implements StorageService {
-  private bucketName: string = 'USER_UPLOADS';
+  private bucketName: string = process.env.USER_UPLOADS_BUCKET_NAME!;
 
   async fileExists(folder_path: string, file_name: string): Promise<number> {
     const { data } = await supabase.storage
@@ -15,8 +15,11 @@ export class SupabaseStorageService implements StorageService {
     return data ? data.length : 0;
   }
 
-  async upload(folder: Folder, file: Express.Multer.File): Promise<File> {
-    let folderPath = String(folder.id);
+  async upload(
+    folder_id: Folder['id'],
+    file: Express.Multer.File,
+  ): Promise<File> {
+    let folderPath = String(folder_id);
     let folderFilePath = file.originalname;
 
     let filePath = `${folderPath}/${folderFilePath}`;
@@ -52,7 +55,7 @@ export class SupabaseStorageService implements StorageService {
     const fileInput = new FileInput({
       name: fileInfo.name,
       created_at: fileInfo.createdAt,
-      folder: folder.id,
+      folder: folder_id,
       mime_type: fileInfo.contentType,
       size_kb: fileInfo.size,
       url: publicUrl.publicUrl,
@@ -68,5 +71,12 @@ export class SupabaseStorageService implements StorageService {
       throw new Error(`${status}:${statusText} - ${SupabaseFileError.message}`);
 
     return supabaseFile[0];
+  }
+
+  async delete(file_paths: string[]): Promise<void> {
+    const { error } = await supabase.storage
+      .from(this.bucketName)
+      .remove(file_paths);
+    if (error) throw new Error(`${error.name}: ${error.message}`);
   }
 }
