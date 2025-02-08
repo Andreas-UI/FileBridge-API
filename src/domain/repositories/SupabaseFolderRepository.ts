@@ -1,5 +1,7 @@
+import { toBuffer } from 'qrcode';
 import { SupabaseStorageService } from '../../application/services/SupabaseStorageService';
 import { supabase } from '../../infrastructure/third-party/supabase';
+import { encrypt } from '../../infrastructure/utils/encryption';
 import { Folder, FolderInput } from '../entities/Folder';
 import { FolderRepository } from '../interfaces/FolderRepository';
 
@@ -28,9 +30,50 @@ export class SupabaseFolderRepository implements FolderRepository {
     const { data, error, status, statusText } = await supabase
       .from('Folder')
       .insert(folder)
-      .select();
+      .select()
+      .single();
     if (error) throw new Error(`${status}:${statusText} - ${error.message}`);
-    return new Folder(data[0]);
+
+    const folderId = data.id;
+
+    const encryptedId = encrypt(String(folderId));
+    const qrUrl = `${process.env.BASE_URL}/folder/files/access/${encryptedId}`;
+    const qrBuffer = await toBuffer(qrUrl);
+    const qrCodeMulterFile: Express.Multer.File = {
+      fieldname: 'qr',
+      originalname: 'qrcode.png',
+      encoding: '7bit',
+      mimetype: 'image/png',
+      buffer: qrBuffer,
+      size: qrBuffer.length,
+      stream: null as any,
+      destination: '',
+      filename: '',
+      path: '',
+    };
+
+    const qrCodeFile = await this.supabaseStorageService.upload(
+      folderId,
+      qrCodeMulterFile,
+    );
+
+    const {
+      data: updatedFolder,
+      error: updateFolderError,
+      status: updateFolderErrorStatus,
+      statusText: updateFolderErrorStatusText,
+    } = await supabase
+      .from('Folder')
+      .update({ qrcode_url: qrCodeFile.url })
+      .eq('id', folderId)
+      .select()
+      .single();
+    if (updateFolderError)
+      throw new Error(
+        `${updateFolderErrorStatus}:${updateFolderErrorStatusText} - ${updateFolderError.message}`,
+      );
+
+    return new Folder(updatedFolder);
   }
 
   async updateOne(folder: Folder) {

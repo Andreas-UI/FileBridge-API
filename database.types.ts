@@ -55,6 +55,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: number
+          qrcode_url: string | null
           subject: string
           user: string | null
         }
@@ -62,6 +63,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: number
+          qrcode_url?: string | null
           subject: string
           user?: string | null
         }
@@ -69,6 +71,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: number
+          qrcode_url?: string | null
           subject?: string
           user?: string | null
         }

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Files in Folder <%= folder_id %></title>
+    
+    <!-- Google Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+                * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .file-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-icon {
+            font-size: 24px;
+            color: #007aff;
+        }
+
+        .file-name {
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .file-meta {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .preview-btn {
+            background: none;
+            border: none;
+            color: #007aff;
+            cursor: pointer;
+        }
+
+        .download-btn {
+            background-color: #28a745;
+            display: none;
+            text-align: center;
+            color: white;
+            width: 100%;
+            padding: 10px;
+            margin-top: 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .download-btn:hover {
+            background-color: #218838;
+        }
+
+        .download-all {
+            display: block;
+            text-align: center;
+            background-color: #007aff;
+            color: white;
+            width: 100%;
+            padding: 10px;
+            margin-top: 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .download-all:hover {
+            background-color: #005bb5;
+        }
+
+        input[type="checkbox"] {
+            transform: scale(1.2);
+            margin-right: 10px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: #fff;
+            padding: 20px;
+            max-width: 600px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .modal img, .modal video, .modal iframe {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+
+        .close-modal {
+            background: red;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        /* Added loading spinner */
+        .loading-spinner {
+            display: none;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007aff;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            color: #dc3545;
+            text-align: center;
+            margin: 10px 0;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Files in Folder <%= folder_id %></h2>
+        <div class="error-message" id="error-message"></div>
+
+        <ul class="file-list">
+            <% files.forEach(file => { %>
+                <li class="file-item">
+                    <div class="file-info">
+                        <input type="checkbox" class="file-checkbox" 
+                               data-url="<%= file.url %>"
+                               data-name="<%= file.name %>">
+                        <i class="file-icon" data-mime="<%= file.mime_type %>"></i>
+                        <div class="file-details">
+                            <a href="<%= file.url %>" class="file-name" download>
+                                <%= file.name.replace(`${folder_id}/`, "") %>
+                            </a>
+                            <div class="file-meta">
+                                <%= (file.size_kb / 1024).toFixed(2) %> MB • 
+                                <%= file.mime_type %> • 
+                                <%= new Date(file.created_at).toLocaleDateString()  %>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="preview-btn" data-url="<%= file.url %>" data-mime="<%= file.mime_type %>">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </li>
+            <% }); %>
+        </ul>
+
+        <div class="action-buttons">
+            <button id="download-selected" class="download-btn">
+                <i class="fas fa-download"></i> Download Selected (<span id="selected-count">0</span>)
+            </button>
+            <button id="download-all" class="download-all">
+                <i class="fas fa-file-archive"></i> Download All as ZIP
+            </button>
+        </div>
+        <div class="loading-spinner" id="loading-spinner"></div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div id="preview-modal" class="modal">
+        <div class="modal-content">
+            <div id="preview-container"></div>
+            <button class="close-modal"><i class="fas fa-times"></i> Close</button>
+        </div>
+    </div>
+
+    <script>
+        // File type icons mapping
+        const fileIcons = {
+            'image/': 'fa-file-image',
+            'video/': 'fa-file-video',
+            'audio/': 'fa-file-audio',
+            'application/pdf': 'fa-file-pdf',
+            'application/zip': 'fa-file-archive',
+            'text/': 'fa-file-alt',
+            'default': 'fa-file'
+        };
+
+        // Set appropriate icons
+        document.querySelectorAll('.file-icon').forEach(icon => {
+            const mimeType = icon.getAttribute('data-mime');
+            
+            for (const [prefix, className] of Object.entries(fileIcons)) {
+                if (mimeType.startsWith(prefix)) {
+                    icon.classList.add("fa");
+                    icon.classList.add(className);
+                    return;
+                }
+            }
+            icon.classList.add(fileIcons.default);
+        });
+
+        // Download handling
+        let selectedFiles = new Map();
+
+        function updateSelectionUI() {
+            const selectedCount = selectedFiles.size;
+            document.getElementById('selected-count').textContent = selectedCount;
+            document.getElementById('download-selected').style.display = 
+                selectedCount > 0 ? 'block' : 'none';
+        }
+
+        document.querySelectorAll('.file-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                const url = checkbox.dataset.url;
+                const name = checkbox.dataset.name;
+
+                
+                if (checkbox.checked) {
+                    selectedFiles.set(url, checkbox.dataset.name);
+                } else {
+                    selectedFiles.delete(url);
+                }
+                
+                updateSelectionUI();
+            });
+        });
+
+        // Single file download
+        document.querySelectorAll('.file-name').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const url = link.href;
+                triggerDownload(url, link.textContent);
+            });
+        });
+
+        // Selected files download
+        document.getElementById('download-selected').addEventListener('click', async () => {
+            try {
+                showLoading();
+                console.log(Array.from(selectedFiles.values()))
+                const response = await fetch('/folder/files/download-zip', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        folder_id: '<%= folder_id %>',
+                        file_paths: Array.from(selectedFiles.values())
+                    })
+                });
+
+                if (!response.ok) throw new Error('Download failed');
+                
+                const blob = await response.blob();
+                triggerDownload(URL.createObjectURL(blob), '<%= folder_id %>-selected-files.zip');
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                hideLoading();
+            }
+        });
+
+        // Download All as ZIP
+        document.getElementById('download-all').addEventListener('click', async () => {
+            const files = JSON.parse(`<%- JSON.stringify(files) %>`);
+            try {
+                showLoading();
+                const response = await fetch('/folder/files/download-zip', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            folder_id: '<%= folder_id %>',
+                            file_paths: Array.from(files).map((file) => file.name)
+                        })
+                    });
+                
+                if (!response.ok) throw new Error('Download failed');
+                
+                const blob = await response.blob();
+                triggerDownload(URL.createObjectURL(blob), '<%= folder_id %>-archive.zip');
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                hideLoading();
+            }
+        });
+
+        // Utility functions
+        function triggerDownload(url, filename) {
+            const anchor = document.createElement('a');
+            anchor.href = url;
+            anchor.download = filename;
+            document.body.appendChild(anchor);
+            anchor.click();
+            document.body.removeChild(anchor);
+        }
+
+        function showLoading() {
+            document.getElementById('loading-spinner').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-spinner').style.display = 'none';
+        }
+
+        function showError(message) {
+            const errorEl = document.getElementById('error-message');
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+            setTimeout(() => errorEl.style.display = 'none', 5000);
+        }
+
+        // Preview modal handling (keep existing implementation)
+        document.querySelectorAll('.preview-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const fileUrl = this.getAttribute('data-url');
+                const mimeType = this.getAttribute('data-mime');
+                const previewContainer = document.getElementById('preview-container');
+                
+                previewContainer.innerHTML = '';
+
+                if (mimeType.startsWith('image')) {
+                    previewContainer.innerHTML = '<img src="' + fileUrl + '" alt="Preview">';
+                } else if (mimeType.startsWith('video')) {
+                    previewContainer.innerHTML = '<video controls><source src="' + fileUrl + '" type="' + mimeType + '"></video>';
+                } else if (mimeType === 'application/pdf') {
+                    previewContainer.innerHTML = '<iframe src="' + fileUrl + '" width="100%" height="400px"></iframe>';
+                } else {
+                    previewContainer.innerHTML = '<p>Preview not available for this file type.</p>';
+                }
+
+                document.getElementById('preview-modal').style.display = 'flex';
+            });
+        });
+
+        document.querySelector('.close-modal').addEventListener('click', function() {
+            document.getElementById('preview-modal').style.display = 'none';
+        });
+    </script>
+</body>
+</html>

@@ -6,7 +6,7 @@ export class SupabaseAuthService implements AuthService {
     const { error } = await supabase.auth.signInWithOtp({
       email: email,
       options: {
-        emailRedirectTo: `${process.env.PROJECT_URL}/auth/callback`
+        emailRedirectTo: `${process.env.BASE_URL}/auth/callback`
       }
     });
     if (error) throw new Error(error.message);

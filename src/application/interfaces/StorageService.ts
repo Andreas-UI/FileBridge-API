@@ -3,5 +3,6 @@ import { Folder } from '../../domain/entities/Folder';
 
 export interface StorageService {
   upload(folder_id: Folder['id'], file: Express.Multer.File): Promise<File>;
-  delete(file_paths: string[]): Promise<void>;
+  delete(file_paths: File["url"][]): Promise<void>;
+  download(file_path: File["url"]): Promise<Blob>
 }

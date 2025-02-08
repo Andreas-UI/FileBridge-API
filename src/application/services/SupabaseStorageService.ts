@@ -79,4 +79,12 @@ export class SupabaseStorageService implements StorageService {
       .remove(file_paths);
     if (error) throw new Error(`${error.name}: ${error.message}`);
   }
+
+  async download(file_path: string): Promise<Blob> {
+    const { data, error } = await supabase.storage
+      .from(this.bucketName)
+      .download(file_path);
+    if (error) throw new Error(`${error.name}: ${error.message}`);
+    return data;
+  }
 }

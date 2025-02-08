@@ -1,10 +1,10 @@
 import { File } from '../../domain/entities/File';
 import { FileRepository } from '../../domain/interfaces/FileRepository';
 
-export class DeleteFiles {
+export class DownloadFile {
   constructor(private repository: FileRepository) {}
 
-  async execute(file_ids: File['id'][]) {
-    return await this.repository.deleteMany(file_ids);
+  async execute(file_path: File['url']) {
+    return await this.repository.download(file_path);
   }
 }

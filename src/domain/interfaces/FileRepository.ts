@@ -8,5 +8,7 @@ export interface FileRepository {
     folder_id: Folder['id'],
     files: Express.Multer.File[],
   ): Promise<File[]>;
-  deleteMany(folder_id: Folder['id'], file_ids: File['id'][]): Promise<void>;
+  deleteMany(file_ids: File['id'][]): Promise<void>;
+  findFilesByFolder(folder_id: Folder['id']): Promise<File[]>;
+  download(file_path: File['url']): Promise<Blob>;
 }

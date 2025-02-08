@@ -11,10 +11,16 @@ export class SupabaseFileRepository implements FileRepository {
     throw new Error('Method not implemented.');
   }
 
-  async deleteMany(
-    folder_id: Folder['id'],
-    file_ids: File['id'][],
-  ): Promise<void> {
+  async findFilesByFolder(folder_id: Folder['id']): Promise<File[]> {
+    const { data, error, status, statusText } = await supabase
+      .from('File')
+      .select()
+      .eq('folder', folder_id);
+    if (error) throw new Error(`${status}:${statusText} - ${error.message}`);
+    return data;
+  }
+
+  async deleteMany(file_ids: File['id'][]): Promise<void> {
     const {
       data: files,
       error: filesSelectError,
@@ -57,5 +63,9 @@ export class SupabaseFileRepository implements FileRepository {
     return await Promise.all(
       files.map((file) => this.supabaseStorageService.upload(folder_id, file)),
     );
+  }
+
+  async download(file_path: File['url']) {
+    return await this.supabaseStorageService.download(file_path);
   }
 }
