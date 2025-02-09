@@ -2,7 +2,7 @@ import { toBuffer } from 'qrcode';
 import { SupabaseStorageService } from '../../application/services/SupabaseStorageService';
 import { supabase } from '../../infrastructure/third-party/supabase';
 import { encrypt } from '../../infrastructure/utils/encryption';
-import { Folder, FolderInput } from '../entities/Folder';
+import { Folder, FolderInput, FolderWithFiles } from '../entities/Folder';
 import { FolderRepository } from '../interfaces/FolderRepository';
 
 export class SupabaseFolderRepository implements FolderRepository {
@@ -11,19 +11,32 @@ export class SupabaseFolderRepository implements FolderRepository {
   async findAll() {
     const { data, error, status, statusText } = await supabase
       .from('Folder')
-      .select();
+      .select('*, files: File(*)');
+
     if (error) throw new Error(`${status}:${statusText} - ${error.message}`);
-    return data;
+
+    const foldersWithFilesAndCount = data.map((folder) => ({
+      ...folder,
+      file_count: folder.files.length,
+    }));
+
+    return foldersWithFilesAndCount;
   }
 
   async findById(id: number) {
     const { data, error, status, statusText } = await supabase
       .from('Folder')
-      .select('*')
+      .select('*, files: File(*)')
       .eq('id', id)
       .single();
     if (error) throw new Error(`${status}:${statusText} - ${error.message}`);
-    return new Folder(data);
+
+    const folderWithFilesAndCount = {
+      ...data,
+      file_count: data.files.length,
+    };
+
+    return new FolderWithFiles(folderWithFilesAndCount);
   }
 
   async insertOne(folder: FolderInput) {
