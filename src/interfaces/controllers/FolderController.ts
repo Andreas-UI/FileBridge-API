@@ -35,7 +35,12 @@ export class FolderController extends Controller {
   async delete(req: Request, res: Response) {
     await this.handleRequest(req, res, () => {
       const { folder_ids } = req.body;
-      return this.deleteFolders.execute(JSON.parse(folder_ids));
+      try {
+        let parsedIds = typeof folder_ids === "string" ? JSON.parse(folder_ids) : folder_ids;      
+        return this.deleteFolders.execute(parsedIds);
+      } catch (error) {
+        return this.deleteFolders.execute([]);
+      }
     });
   }
 }
