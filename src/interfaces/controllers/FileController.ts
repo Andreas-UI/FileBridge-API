@@ -24,7 +24,13 @@ export class FileController extends Controller {
   async delete(req: Request, res: Response) {
     await this.handleRequest(req, res, async () => {
       const { file_ids } = req.body;
-      return await this.deleteFiles.execute(JSON.parse(file_ids));
+      try {
+        let parsedIds =
+          typeof file_ids === 'string' ? JSON.parse(file_ids) : file_ids;
+        return this.deleteFiles.execute(parsedIds);
+      } catch (error) {
+        return this.deleteFiles.execute([]);
+      }
     });
   }
 

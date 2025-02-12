@@ -1,8 +1,11 @@
+import { Tables } from '../../../database.types';
 import { File } from '../entities/File';
 import { Folder, FolderInput } from '../entities/Folder';
 
 export interface FolderRepository {
-  findAll(): Promise<Array<Folder & { file_count: number; files: File[] }>>;
+  findAll(
+    sort_by?: keyof Tables<'Folder'>,
+  ): Promise<Array<Folder & { file_count: number; files: File[] }>>;
   findById(
     id: number,
   ): Promise<(Folder & { file_count: number; files: File[] }) | null>;

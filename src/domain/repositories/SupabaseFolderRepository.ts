@@ -4,14 +4,16 @@ import { supabase } from '../../infrastructure/third-party/supabase';
 import { encrypt } from '../../infrastructure/utils/encryption';
 import { Folder, FolderInput, FolderWithFiles } from '../entities/Folder';
 import { FolderRepository } from '../interfaces/FolderRepository';
+import { Tables } from '../../../database.types';
 
 export class SupabaseFolderRepository implements FolderRepository {
   private supabaseStorageService = new SupabaseStorageService();
 
-  async findAll() {
+  async findAll(sort_by?: keyof Tables<'Folder'>) {
     const { data, error, status, statusText } = await supabase
       .from('Folder')
-      .select('*, files: File(*)');
+      .select('*, files: File(*)')
+      .order(sort_by || 'subject');
 
     if (error) throw new Error(`${status}:${statusText} - ${error.message}`);
 
